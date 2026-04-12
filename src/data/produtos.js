@@ -15,7 +15,7 @@ export const produtosFixos = [
     nome: "MOUSE GAMER PRO WIRELESS",
     preco: 420.00,
     categoria: "Mouses",
-    imagem: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrldIl-qHjAtjrHkEnCc0cOLr18U57BieSgw&s",
+    imagem: "https://fallen.cdn.magazord.com.br/img/2025/06/produto/3615/pantera-furia-alpha0010-min.png",
     options: {
       DPI: ["16k DPI", "25k DPI"],
       Conector: ["USB-C", "Wireless Dongle"]
