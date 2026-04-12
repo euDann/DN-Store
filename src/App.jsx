@@ -12,7 +12,7 @@ import Cadastro from './components/pages/Cadastro'
 import Perfil from "./components/pages/Perfil" 
 import Features from './components/Features'
 import Footer from './components/Footer'
-import Categories from './components/Categories'
+import Categories from './components/categories'
 
 function App() {
   const [produtos] = useState(produtosFixos); 
