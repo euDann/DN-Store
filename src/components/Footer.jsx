@@ -1,59 +1,18 @@
+import { Link } from 'react-router-dom';
+import { ArrowUpRight } from 'lucide-react';
+
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-white/5 bg-[#050505] pt-16 pb-8 px-6">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-        {/* Coluna Logo */}
-        <div className="md:col-span-1">
-          <h2 className="text-2xl font-[1000] uppercase tracking-tighter italic text-white mb-4">
-            TECHSTORE<span className="text-purple-500">PRO</span>
-          </h2>
-          <p className="text-gray-500 text-xs font-bold leading-relaxed uppercase tracking-wider">
-            A vanguarda do setup gamer. <br/> Equipamentos selecionados pela DN Core para performance extrema.
-          </p>
+    <footer className="bg-[#07070a] px-4 pb-4 pt-8 sm:px-6 sm:pb-6 sm:pt-16">
+      <div className="mx-auto grid max-w-[1320px] gap-6 sm:gap-10 border-b border-white/[0.08] pb-7 sm:pb-10 md:grid-cols-[1.5fr_1fr_1fr]">
+        <div className="max-w-sm">
+          <Link to="/" className="text-xl font-black uppercase tracking-tight text-white">DN<span className="text-purple-400"> STORE</span></Link>
+          <p className="mt-2 sm:mt-4 text-xs sm:text-sm leading-5 sm:leading-6 text-gray-500">Tecnologia e acessórios para montar um espaço que é a sua cara.</p>
         </div>
-
-        {/* Colunas de Links */}
-        <div>
-          <h4 className="text-white font-black uppercase text-[10px] tracking-[0.3em] mb-6">Navegação</h4>
-          <ul className="space-y-3 text-gray-500 text-[10px] font-black uppercase tracking-widest">
-            <li className="hover:text-purple-500 cursor-pointer transition-colors">Produtos</li>
-            <li className="hover:text-purple-500 cursor-pointer transition-colors">Novidades</li>
-            <li className="hover:text-purple-500 cursor-pointer transition-colors">Setup Pro</li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-white font-black uppercase text-[10px] tracking-[0.3em] mb-6">Suporte</h4>
-          <ul className="space-y-3 text-gray-500 text-[10px] font-black uppercase tracking-widest">
-            <li className="hover:text-purple-500 cursor-pointer transition-colors">Rastreio</li>
-            <li className="hover:text-purple-500 cursor-pointer transition-colors">Garantia</li>
-            <li className="hover:text-purple-500 cursor-pointer transition-colors">Termos</li>
-          </ul>
-        </div>
-
-        {/* Newsletter / Social */}
-        <div>
-          <h4 className="text-white font-black uppercase text-[10px] tracking-[0.3em] mb-6">Comunidade</h4>
-          <div className="flex gap-4">
-            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-purple-600 transition-all cursor-pointer">
-              <span className="text-white text-xs font-bold italic">IG</span>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-purple-600 transition-all cursor-pointer">
-              <span className="text-white text-xs font-bold italic">TW</span>
-            </div>
-          </div>
-        </div>
+        <div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Navegue</p><div className="mt-3 sm:mt-4 flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm text-gray-500"><a href="#catalogo" className="transition hover:text-white">Catálogo</a><a href="#como-funciona" className="transition hover:text-white">Como funciona</a><Link to="/painel" className="transition hover:text-white">Painel demonstrativo</Link></div></div>
+        <div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Pedidos</p><p className="mt-3 sm:mt-4 text-xs sm:text-sm leading-5 sm:leading-6 text-gray-500">Escolha os produtos, revise seu pedido e converse com a loja pelo WhatsApp.</p><a href="#catalogo" className="mt-3 sm:mt-4 inline-flex items-center gap-2 text-xs font-bold text-purple-300 transition hover:text-white">Ver produtos <ArrowUpRight size={14} /></a></div>
       </div>
-
-      <div className="max-w-7xl mx-auto border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.4em]">
-          © 2026 DN CORE TECHSTORE. ALL RIGHTS RESERVED.
-        </p>
-        <div className="flex gap-6 text-[9px] text-gray-700 font-bold uppercase tracking-widest">
-          <span>Brasil / B. Roxo</span>
-          <span>Status: Online</span>
-        </div>
-      </div>
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-1.5 sm:gap-2 pt-4 sm:pt-5 text-[9px] sm:text-[10px] font-medium text-gray-600 sm:flex-row sm:items-center sm:justify-between"><span>© 2026 DN Store</span><span>Catálogo online · Brasil</span></div>
     </footer>
   );
 }

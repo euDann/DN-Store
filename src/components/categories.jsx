@@ -1,35 +1,12 @@
-import { motion } from 'framer-motion'
+import { motion } from 'framer-motion';
 
-export default function Categories({ categoriaAtiva, setCategoriaAtiva }) {
-  const categorias = ["Todos", "Teclados", "Mouses", "Monitores", "Hardware"];
-
+export default function Categories({ categorias, categoriaAtiva, setCategoriaAtiva }) {
   return (
-    <div className="w-full flex sm:justify-center gap-3 mb-12 overflow-x-auto px-6 no-scrollbar snap-x">
-      {categorias.map((cat) => (
-        <button
-          key={cat}
-          onClick={() => setCategoriaAtiva(cat)}
-          className="relative flex-none px-6 sm:px-8 py-3 rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] transition-colors overflow-hidden group snap-center"
-        >
-          {categoriaAtiva === cat && (
-            <motion.div 
-              layoutId="activeTab"
-              className="absolute inset-0 bg-white shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-            />
-          )}
-          
-          <span className={`relative z-10 transition-colors duration-300 ${
-            categoriaAtiva === cat ? "text-black" : "text-gray-500 group-hover:text-white"
-          }`}>
-            {cat}
-          </span>
-
-          {categoriaAtiva !== cat && (
-            <div className="absolute inset-0 border border-white/5 rounded-2xl transition-colors group-hover:border-purple-500/30" />
-          )}
-        </button>
-      ))}
+    <div className="mb-7 flex gap-2 overflow-x-auto border-b border-white/10 pb-3 no-scrollbar">
+      {categorias.map(categoria => <button key={categoria} onClick={() => setCategoriaAtiva(categoria)} className={`relative flex-none px-4 py-3 text-xs font-bold transition-colors ${categoriaAtiva === categoria ? 'text-white' : 'text-gray-500 hover:text-gray-200'}`}>
+        {categoriaAtiva === categoria && <motion.span layoutId="activeCategory" className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-purple-400" transition={{ type: 'spring', bounce: 0.15, duration: 0.45 }} />}
+        {categoria}
+      </button>)}
     </div>
   );
 }
