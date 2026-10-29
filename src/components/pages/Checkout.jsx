@@ -1,186 +1,61 @@
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CreditCard, Truck, ShieldCheck, MapPin, Loader2 } from 'lucide-react';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { MessageCircle, ArrowLeft, ShoppingBag } from 'lucide-react';
+import { formatarPreco } from '../../config/loja';
 
-export default function Checkout({ itens, onCompraSucesso }) {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [buscandoCep, setBuscandoCep] = useState(false);
-  
-  // Novo estado para o frete dinâmico
-  const [valorFrete, setValorFrete] = useState(0);
+export default function Checkout({ itens, whatsapp }) {
+  const subtotal = useMemo(() => itens.reduce((total, item) => total + item.preco * item.quantidade, 0), [itens]);
+  const numero = (whatsapp || '').replace(/\D/g, '');
+  const mensagem = useMemo(() => {
+    const linhas = itens.map(item => {
+      const opcoes = Object.entries(item.configuracao || {}).map(([nome, valor]) => `   • ${nome}: ${valor}`).join('\n');
+      return `• ${item.nome} — ${item.quantidade}x ${formatarPreco(item.preco)} = ${formatarPreco(item.preco * item.quantidade)}${opcoes ? `\n${opcoes}` : ''}`;
+    });
+    return `Olá! Gostaria de fazer um pedido na DN Store.\n\n${linhas.join('\n')}\n\nSubtotal dos produtos: ${formatarPreco(subtotal)}\n\nPode confirmar a disponibilidade e me ajudar a combinar a entrega e o pagamento?`;
+  }, [itens, subtotal]);
+  const linkWhatsApp = numero ? `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}` : '';
 
-  const [form, setForm] = useState({
-    cep: '',
-    numero: '',
-    endereco: '',
-    bairro: '',
-    cidade: '',
-    uf: '',
-    nomeCartao: '',
-    numeroCartao: '',
-    cvv: ''
-  });
-
-  const subtotal = useMemo(() => {
-    return itens.reduce((acc, item) => acc + item.preco, 0);
-  }, [itens]);
-
-  // Função para definir o frete baseado no estado (UF)
-  const calcularFretePorRegiao = (uf) => {
-    if (subtotal > 1000) return 0; // Regra de Frete Grátis
-
-    const tabelaFrete = {
-      'SP': 15.00, 'RJ': 20.00, 'MG': 25.00, 'ES': 25.00, // Sudeste
-      'PR': 30.00, 'SC': 30.00, 'RS': 35.00,             // Sul
-      'DF': 35.00, 'GO': 40.00,                         // Centro-Oeste
-      'BA': 45.00, 'PE': 50.00,                         // Nordeste
-      'AM': 65.00, 'PA': 60.00                          // Norte
-    };
-
-    return tabelaFrete[uf] || 40.00; // Valor padrão para outros estados
-  };
-
-  const handleCepBlur = async (e) => {
-    const cep = e.target.value.replace(/\D/g, '');
-    if (cep.length !== 8) return;
-
-    setBuscandoCep(true);
-    try {
-      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-      const data = await response.json();
-
-      if (!data.erro) {
-        // Calcula o frete assim que a UF é descoberta
-        const freteCalculado = calcularFretePorRegiao(data.uf);
-        setValorFrete(freteCalculado);
-
-        setForm(prev => ({
-          ...prev,
-          cep: data.cep,
-          endereco: data.logradouro,
-          bairro: data.bairro,
-          cidade: data.localidade,
-          uf: data.uf
-        }));
-      }
-    } catch (err) {
-      console.error("Erro ao buscar CEP:", err);
-    } finally {
-      setBuscandoCep(false);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const payload = {
-      usuario: localStorage.getItem('user-name') || "Usuário Anonimo",
-      itens: itens.map(i => ({ id: i.id, nome: i.nome, preco: i.preco })),
-      total: subtotal + valorFrete,
-      frete: valorFrete,
-      endereco: `${form.endereco}, ${form.numero} - ${form.cidade}/${form.uf} (CEP: ${form.cep})`,
-      pagamento: "Cartão de Crédito"
-    };
-
-    try {
-      const response = await fetch('http://localhost:5000/api/pedidos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (response.ok) {
-        onCompraSucesso();
-        alert("Operação Finalizada! Pedido enviado para o arsenal.");
-        navigate('/perfil');
-      }
-    } catch (err) {
-      alert("Erro ao conectar com o servidor.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (itens.length === 0) return (/* ... mantém seu Arsenal Vazio ... */ null);
+  if (!itens.length) return (
+    <main className="min-h-[70vh] px-4 py-16 sm:px-6 sm:py-24 max-w-3xl mx-auto text-center flex flex-col items-center justify-center">
+      <ShoppingBag size={34} className="text-purple-500 mb-4" />
+      <h1 className="text-xl sm:text-2xl font-black uppercase">Seu carrinho está vazio</h1>
+      <p className="text-sm text-gray-400 mt-2">Escolha alguns produtos para montar seu pedido.</p>
+      <Link to="/" className="mt-6 sm:mt-8 bg-white text-black px-5 sm:px-6 py-3 rounded-xl text-xs font-black uppercase">Ver catálogo</Link>
+    </main>
+  );
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-6 max-w-[1200px] mx-auto">
-      {/* ... Cabeçalho ... */}
+    <main className="min-h-screen pt-10 sm:pt-16 pb-14 sm:pb-20 px-4 sm:px-6 max-w-4xl mx-auto">
+      <Link to="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white text-xs font-bold uppercase"><ArrowLeft size={16} /> Voltar ao catálogo</Link>
+      <header className="mt-6 sm:mt-8 mb-6 sm:mb-8">
+        <p className="text-purple-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Quase pronto</p>
+        <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight">Revise seu pedido</h1>
+        <p className="text-xs sm:text-sm leading-5 sm:leading-6 text-gray-400 mt-2 sm:mt-3">Você vai confirmar disponibilidade, entrega e forma de pagamento diretamente com a loja.</p>
+      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <section className="space-y-4">
-            <div className="flex items-center gap-3 text-purple-500">
-              <MapPin size={20} />
-              <h2 className="font-black uppercase tracking-widest text-xs">Destino da Entrega</h2>
+      <section className="bg-white/[0.04] border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-8">
+        <div className="space-y-3 sm:space-y-5">
+          {itens.map(item => <div key={`${item.id}-${JSON.stringify(item.configuracao || {})}`} className="flex gap-3 sm:gap-4 items-center border-b border-white/10 pb-4 sm:pb-5">
+            <img src={item.imagem} alt={item.nome} className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover bg-white/5" />
+            <div className="flex-1 min-w-0">
+              <h2 className="font-black text-xs sm:text-sm uppercase">{item.nome}</h2>
+              <p className="text-xs text-gray-400 mt-1">Quantidade: {item.quantidade}</p>
+              {Object.entries(item.configuracao || {}).map(([nome, valor]) => <p key={nome} className="text-xs text-gray-500">{nome}: {valor}</p>)}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative">
-                <input 
-                  name="cep" 
-                  required 
-                  placeholder="CEP" 
-                  onBlur={handleCepBlur}
-                  onChange={handleInputChange}
-                  className="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-purple-500 transition-all text-sm" 
-                />
-                {buscandoCep && <Loader2 className="absolute right-4 top-4 animate-spin text-purple-500" size={18} />}
-              </div>
-              <input name="numero" required placeholder="Número" onChange={handleInputChange} className="bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-purple-500 transition-all text-sm" />
-              <input name="endereco" required placeholder="Endereço Completo" value={form.endereco} onChange={handleInputChange} className="md:col-span-2 bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-purple-500 transition-all text-sm" />
-              <input name="cidade" placeholder="Cidade" value={form.cidade} readOnly className="bg-white/2 border border-white/5 p-4 rounded-xl text-gray-500 text-sm" />
-              <input name="uf" placeholder="UF" value={form.uf} readOnly className="bg-white/2 border border-white/5 p-4 rounded-xl text-gray-500 text-sm" />
-            </div>
-          </section>
+            <strong className="text-xs sm:text-sm whitespace-nowrap">{formatarPreco(item.preco * item.quantidade)}</strong>
+          </div>)}
+        </div>
 
-          {/* ... Seção de Pagamento ... */}
+        <div className="flex justify-between items-center py-4 sm:py-6 text-base sm:text-lg font-black uppercase"><span>Subtotal</span><span className="text-purple-400">{formatarPreco(subtotal)}</span></div>
 
-          <button 
-            disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-500 disabled:bg-gray-700 text-white font-[1000] uppercase italic py-5 rounded-2xl shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all active:scale-95 flex justify-center items-center gap-3"
-          >
-            {loading ? <><Loader2 className="animate-spin" /> Processando...</> : "Confirmar e Pagar"}
-          </button>
-        </form>
-
-        <aside className="bg-white/5 border border-white/10 rounded-3xl p-8 h-fit space-y-6">
-          <h2 className="font-black uppercase tracking-widest text-sm border-b border-white/5 pb-4">Resumo do Pedido</h2>
-          
-          {/* ... Lista de Itens ... */}
-
-          <div className="space-y-2 pt-4 border-t border-white/5">
-            <div className="flex justify-between text-gray-400 text-xs">
-              <span>Subtotal</span>
-              <span>R$ {subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-gray-400 text-xs">
-              <span className="flex items-center gap-1"><Truck size={12} /> Frete</span>
-              <span className={valorFrete === 0 ? "text-green-500 font-bold" : ""}>
-                {valorFrete === 0 ? "GRÁTIS" : `R$ ${valorFrete.toFixed(2)}`}
-              </span>
-            </div>
-            <div className="flex justify-between text-white font-black text-xl pt-2">
-              <span>TOTAL</span>
-              <span className="text-purple-500">R$ {(subtotal + valorFrete).toFixed(2)}</span>
-            </div>
+        {numero ? <a href={linkWhatsApp} target="_blank" rel="noreferrer" className="w-full bg-green-600 hover:bg-green-500 text-white min-h-14 px-5 py-4 rounded-2xl font-black uppercase tracking-wide text-sm flex justify-center items-center gap-3 transition-colors"><MessageCircle size={20} /> Enviar pedido pelo WhatsApp</a> : (
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-5">
+            <h2 className="font-black text-sm uppercase text-yellow-300">Falta configurar o WhatsApp da loja</h2>
+            <p className="text-sm text-gray-300 mt-2">Adicione o número comercial com código do país e DDD em <code>src/config/loja.js</code> para ativar o envio do pedido.</p>
           </div>
-          
-          {/* Badge de Proteção */}
-          <div className="bg-purple-500/10 border border-purple-500/20 p-4 rounded-xl flex items-center gap-3">
-            <ShieldCheck className="text-purple-500 shrink-0" size={24} />
-            <p className="text-[9px] uppercase font-bold leading-tight">
-              Criptografia de nível militar ativa. Operação monitorada pelo sistema DN-Core.
-            </p>
-          </div>
-        </aside>
-      </div>
-    </div>
+        )}
+        <p className="text-center text-[10px] sm:text-[11px] leading-4 text-gray-500 mt-3 sm:mt-4">O pedido só será confirmado depois que a loja responder no WhatsApp.</p>
+      </section>
+    </main>
   );
 }
